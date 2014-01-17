@@ -14,7 +14,6 @@ using namespace std ;
 #define P_MIN .001
 #define PI 3.14159265
 
-double rot[2][2] ;
 double **pix ;
 struct frame_t {
 	int ones, multi ;
@@ -27,12 +26,12 @@ double mean_count, rescale, intens_norm ;
 
 int setup() ;
 double emc() ;
-void expand() ;
+void expand(double**, double**, double**) ;
 void maximize() ;
-void compress() ;
+void compress(double**, double**, double**, double**) ;
 void print_intens() ;
 void free_mem() ;
-void make_rot( int ) ;
+void make_rot(int, double[][2]) ;
 
 
 int main(int argc, char* argv[]) {
@@ -80,9 +79,9 @@ double emc() {
 	
 	time(&t1) ;
 	
-	expand() ;
+	expand(pix, intens1, w_in) ;
 	maximize() ;
-	compress() ;
+	compress(pix, w_out, intens2, inter_weight) ;
 	
 	time(&t2) ;
 		
@@ -186,20 +185,21 @@ void maximize() {
 }
 
 
-void expand() {
+void expand(double **pixel, double **intens, double **view) {
 	int r, t, i, j ;
-	double rot_pix[3] ;
+	double rot_pix[2] ;
+	double rot[2][2] ;
 	int x, y ;
 	double tx, ty, fx, fy, cx, cy ;
 	
 	for (r = 0 ; r < num_rot ; ++r) {
-		make_rot(r) ;
+		make_rot(r, rot) ;
 		
 		for (t = 0 ; t < num_pix ; ++t) {
 			for (i = 0 ; i < 2 ; ++i) {
 				rot_pix[i] = 0. ;
 				for (j = 0 ; j < 2 ; ++j)
-					rot_pix[i] += rot[i][j]*pix[t][j] ;
+					rot_pix[i] += rot[i][j]*pixel[t][j] ;
 			}
 				
 			tx = rot_pix[0] + q_max ;
@@ -214,15 +214,16 @@ void expand() {
 			cx = 1. - fx ;
 			cy = 1. - fy ;
 			
-			w_in[r][t] = cx*cy*intens1[x][y] + cx*fy*intens1[x][y+1] + fx*cy*intens1[x+1][y] + fx*fy*intens1[x+1][y+1] ;
+			view[r][t] = cx*cy*intens[x][y] + cx*fy*intens[x][y+1] + fx*cy*intens[x+1][y] + fx*fy*intens[x+1][y+1] ;
 		}
 	}
 }
 
 
-void compress() {
+void compress(double **pixel, double **view, double **intens, double **weight) {
 	int r, t, i, j ;
 	double rot_pix[2] ;
+	double rot[2][2] ;
 	int x, y ;
 	double tx, ty, fx, fy, cx, cy ;
 	double w, f ;
@@ -230,21 +231,21 @@ void compress() {
 	
 	for (x = 0 ; x < size ; ++x)
 	for (y = 0 ; y < size ; ++y) {
-		inter_weight[x][y] = 0. ;
-		intens2[x][y] = 0. ;
+		weight[x][y] = 0. ;
+		intens[x][y] = 0. ;
 	}
 	
 	for (r = 0 ; r < num_rot ; ++r) {
-		if (s[r] == 0.)
-			continue ;
+//		if (s[r] == 0.)
+//			continue ;
 			
-		make_rot(r) ;
+		make_rot(r, rot) ;
 		
 		for (t = 0 ; t < num_pix ; ++t) {
 			for (i = 0 ; i < 2 ; ++i) {
 				rot_pix[i] = 0. ;
 				for (j = 0 ; j < 2 ; ++j)
-					rot_pix[i] += rot[i][j]*pix[t][j] ;
+					rot_pix[i] += rot[i][j]*pixel[t][j] ;
 			}
 			
 			tx = rot_pix[0] + q_max ;
@@ -259,31 +260,31 @@ void compress() {
 			cx = 1. - fx ;
 			cy = 1. - fy ;
 			
-			w = w_out[r][t] ;
+			w = view[r][t] ;
 			
 			f = cx*cy ;
-			inter_weight[x][y] += f ;
-			intens2[x][y] += f * w ;
+			weight[x][y] += f ;
+			intens[x][y] += f * w ;
 			
 			f = cx*fy ;
-			inter_weight[x][y+1] += f ;
-			intens2[x][y+1] += f * w ;
+			weight[x][y+1] += f ;
+			intens[x][y+1] += f * w ;
 			
 			f = fx*cy ;
-			inter_weight[x+1][y] += f ;
-			intens2[x+1][y] += f * w ;
+			weight[x+1][y] += f ;
+			intens[x+1][y] += f * w ;
 			
 			f = fx*fy ;
-			inter_weight[x+1][y+1] += f ;
-			intens2[x+1][y+1] += f * w ;
+			weight[x+1][y+1] += f ;
+			intens[x+1][y+1] += f * w ;
 		}
 	}
 		
 	norm = intens_norm / mean_count ;
 	for (x = 0 ; x < size ; ++x)
 	for (y = 0 ; y < size ; ++y)
-		if (inter_weight[x][y] != 0.)
-			intens2[x][y] *= norm / inter_weight[x][y] ;
+		if (weight[x][y] != 0.)
+			intens[x][y] *= norm / weight[x][y] ;
 }
 	
 	
@@ -428,13 +429,13 @@ void free_mem() {
 }
 
 
-void make_rot( int r ) {
+void make_rot(int r, double r_matrix[][2]) {
 	double a ;
 	
 	a = r * 2 * PI / num_rot ;
 
-	rot[0][0] = cos(a) ;
-	rot[0][1] = sin(a) ;
-	rot[1][0] = -sin(a);
-	rot[1][1] = cos(a) ;
+	r_matrix[0][0] = cos(a) ;
+	r_matrix[0][1] = sin(a) ;
+	r_matrix[1][0] = -sin(a);
+	r_matrix[1][1] = cos(a) ;
 }
