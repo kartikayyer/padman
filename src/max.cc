@@ -2,7 +2,7 @@
 #define MAX_HPP
 
 #include <math.h>
-#include "structs.hpp"
+#include "structs.hh"
 
 #define P_MIN 0.001
 

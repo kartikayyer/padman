@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <time.h>
 #include <math.h>
-#include "structs.hpp"
+#include "structs.hh"
 using namespace std ;
 
 void free_mem(data_t*, det_t*, model_t*, view_t*) ;

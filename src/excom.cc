@@ -2,7 +2,7 @@
 #define EXCOM_HPP
 
 #include <math.h>
-#include "structs.hpp"
+#include "structs.hh"
 
 #define PI 3.14159265
 

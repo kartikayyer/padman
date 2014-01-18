@@ -1,5 +1,5 @@
-#ifndef STRUCTS_H
-#define STRUCTS_H
+#ifndef STRUCTS_HH
+#define STRUCTS_HH
 
 #include <iostream>
 #include <fstream>
@@ -186,4 +186,4 @@ void expand(det_t*, model_t*, view_t*) ;
 void maximize(data_t*, view_t*) ;
 void compress(det_t*, model_t*, view_t*) ;
 
-#endif // STRUCTS_H
+#endif // STRUCTS_HH
