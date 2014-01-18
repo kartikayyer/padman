@@ -2,21 +2,13 @@
 
 */
 
-#include <iostream>
 #include <iomanip>
-#include <fstream>
-#include <stdlib.h>
 #include <time.h>
 #include <math.h>
 #include "structs.hpp"
-//#include "max.cpp"
-//#include "excom.cpp"
 using namespace std ;
 
-#define EULER 0.57721566490153286
-
-double diff_intens(model_t*) ;
-void print_intens(model_t*) ;
+void free_mem(data_t*, det_t*, model_t*, view_t*) ;
 
 int main(int argc, char* argv[]) {
 	int iter, i ;
@@ -31,12 +23,20 @@ int main(int argc, char* argv[]) {
 	if ( argc == 2 )
 		iter = atoi(argv[1]) ;
 	else {
-		printf("expected one argument: iter\n") ;
+		cerr << "expected one argument: iter\n" ;
 		return 0 ;
 	}
 	
-	if (!setup(&Data, &Det, &Model, &View))
-		return 0 ;
+	if (!View.init())
+		return 1 ;
+	if (!Data.init())
+		return 1 ;
+	if (!Model.init())
+		return 1 ;
+	if (!Det.init())
+		return 1 ;
+	
+	Model.intens_norm /= Data.mean_count ;
 	
 	fp.open("EMC.log", ios::out) ;
 	fp << "num_rot = " << View.num_rot << "\tnum_data = " << Data.num_data << "\tnum_pix = " << View.num_pix << endl ;
@@ -51,8 +51,8 @@ int main(int argc, char* argv[]) {
 		maximize(&Data, &View) ;
 		compress(&Det, &Model, &View) ;
 		
-		rms_change = diff_intens(&Model) * View.num_pix / Model.intens_norm * Data.mean_count ;
-		print_intens(&Model) ;
+		rms_change = Model.diff_intens() * View.num_pix / Model.intens_norm * Data.mean_count ;
+		Model.print_intens() ;
 		
 		time(&t2) ;
 		
@@ -67,33 +67,31 @@ int main(int argc, char* argv[]) {
 }
 
 
-void print_intens(model_t *model) {
-	fstream fp ;
-	int x, y ;
+void free_mem(data_t *data, det_t *det, model_t *model, view_t *view) {
+	int i, d, r ;
 	
-	fp.open("finish.dat", ios::out) ;
+	delete[] det->pix ;
 	
-	for (x = 0 ; x < model->size ; ++x) {
-		for (y = 0 ; y < model->size ; ++y)
-			fp << model->out[x][y] ;
-			
-		fp << endl ;
+	for (i = 0 ; i < model->size ; ++i) {
+		delete[] model->in[i] ;
+		delete[] model->out[i] ;
+		delete[] model->weight[i] ;
 	}
-		
-	fp.close() ;
-}
-
-
-double diff_intens(model_t *model) {
-	int x, y ;
-	double d, change = 0. ;
+	delete[] model->in ;
+	delete[] model->out ;
+	delete[] model->weight ;
 	
-	for (x = 0 ; x < model->size ; ++x)
-	for (y = 0 ; y < model->size ; ++y) {
-		d = model->in[x][y] - model->out[x][y] ;
-		change += d*d ;
-		model->in[x][y] = model->out[x][y] ;
+	for (d = 0 ; d < data->num_data ; ++d) {
+		delete[] data->frame[d].place_ones ;
+		delete[] data->frame[d].place_multi ;
+		delete[] data->frame[d].count ;
 	}
+	delete[] data->frame ;
 	
-	return sqrt(change / (model->size * model->size)) ;
+	for (r = 0 ; r < view->num_rot ; ++r) {
+		delete[] view->in[r] ;
+		delete[] view->out[r] ;
+	}
+	delete[] view->in ;
+	delete[] view->out ;
 }
