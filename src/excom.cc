@@ -19,17 +19,17 @@ void expand(det_t *det, model_t *model, view_t *view) {
 	int r, t, i, j ;
 	double rot_pix[2] ;
 	double rot[2][2] ;
-	int x, y, q_max = (model->size - 3) / 2 ;
+	int x, y, q_max = (model->size - 2) / 2 ;
 	double tx, ty, fx, fy, cx, cy ;
 	
 	for (r = 0 ; r < view->num_rot ; ++r) {
-		make_rot(r * 2 * PI / view->num_rot, rot) ;
+		make_rot(r * 2 * PI / (view->num_rot), rot) ;
 		
 		for (t = 0 ; t < view->num_pix ; ++t) {
 			for (i = 0 ; i < 2 ; ++i) {
 				rot_pix[i] = 0. ;
 				for (j = 0 ; j < 2 ; ++j)
-					rot_pix[i] += rot[i][j]*det->pix[t][j] ;
+					rot_pix[i] += rot[i][j] * det->pix[t][j] ;
 			}
 			
 			tx = rot_pix[0] + q_max ;
@@ -44,7 +44,10 @@ void expand(det_t *det, model_t *model, view_t *view) {
 			cx = 1. - fx ;
 			cy = 1. - fy ;
 			
-			view->in[r][t] = cx*cy*model->in[x][y] + cx*fy*model->in[x][y+1] + fx*cy*model->in[x+1][y] + fx*fy*model->in[x+1][y+1] ;
+			view->in[r][t] = cx*cy*(model->in)[x][y] 
+					+ cx*fy*(model->in[x][y+1]) 
+					+ fx*cy*(model->in[x+1][y]) 
+					+ fx*fy*(model->in[x+1][y+1]) ;
 		}
 	}
 }
@@ -54,7 +57,7 @@ void compress(det_t *det, model_t *model, view_t *view) {
 	int r, t, i, j ;
 	double rot_pix[2] ;
 	double rot[2][2] ;
-	int x, y, q_max = (model->size - 3) / 2 ;
+	int x, y, q_max = (model->size - 2) / 2 ;
 	double tx, ty, fx, fy, cx, cy ;
 	double w, f ;
 	

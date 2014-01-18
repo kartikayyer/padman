@@ -40,7 +40,8 @@ int main(int argc, char* argv[]) {
 	
 	fp.open("EMC.log", ios::out) ;
 	fp << "num_rot = " << View.num_rot << "\tnum_data = " << Data.num_data << "\tnum_pix = " << View.num_pix << endl ;
-	fp << "mean_count = " << Data.mean_count << endl << endl ; 
+	fp << "size = " << Model.size << endl ;
+	fp << "mean_count = " << Data.mean_count << "\tintens_norm = " << Model.intens_norm << endl << endl ; 
 	fp << "iter\trms_change\titer_time\n" ;
 	fp.close() ;
 	
@@ -57,7 +58,7 @@ int main(int argc, char* argv[]) {
 		time(&t2) ;
 		
 		fp.open("EMC.log", ios::out|ios::app) ;
-		fp << i << "\t" << rms_change << "\t" << difftime(t2, t1) << endl ;
+		fp << i << "\t" << rms_change << "  \t" << difftime(t2, t1) << " s" << endl ;
 		fp.close() ;
 	}
 	

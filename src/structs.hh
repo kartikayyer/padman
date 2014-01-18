@@ -6,7 +6,7 @@
 #include <stdlib.h>
 using namespace std ;
 
-#define NUM_ROT 1000
+#define NUM_ROT 100
 #define INTENS_NORM 2000.
 
 struct frame_t {
@@ -36,7 +36,7 @@ struct data_t {
 		
 		for (d = 0 ; d < num_data ; ++d) {
 			fp >> frame[d].ones ;
-			mean_count = frame[d].ones ;
+			mean_count += (double) frame[d].ones ;
 			
 			frame[d].place_ones = new int[frame[d].ones] ;
 			
@@ -50,11 +50,11 @@ struct data_t {
 			
 			for (t = 0 ; t < frame[d].multi ; ++t) {
 				fp >> frame[d].place_multi[t] >> frame[d].count[t] ;
-				mean_count += frame[d].count[t] ;
+				mean_count += (double) frame[d].count[t] ;
 			}
 		}
 		
-		mean_count /= num_data ;
+		mean_count /= (double) num_data ;
 		
 		return 1 ;
 	}
@@ -66,14 +66,14 @@ struct det_t {
 	
 	int init() {
 		fstream fp ;
-		int t, i ;
+		int t, i, size ;
 		
 		fp.open("det.dat", ios::in) ;
 		if (!fp.is_open()) {
 			cerr << "cannot open det.dat\n" ;
 			return 0 ;
 		}
-		fp >> num_pix ;
+		fp >> num_pix >> size ;
 		pix = new double*[num_pix] ;
 		for (t = 0 ; t < num_pix ; ++t) {
 			pix[t] = new double[2] ;
@@ -99,7 +99,7 @@ struct model_t {
 		
 		for (x = 0 ; x < size ; ++x) {
 			for (y = 0 ; y < size ; ++y)
-				fp << out[x][y] ;
+				fp << out[x][y] << " ";
 				
 			fp << endl ;
 		}
@@ -123,14 +123,15 @@ struct model_t {
 	
 	int init() {
 		fstream fp ;
-		int num, i, j ;
+		int num, i, j, qmax ;
 		
 		fp.open("det.dat", ios::in) ;
 		if (!fp.is_open()) {
 			cerr << "cannot open det.dat\n" ;
 			return 0 ;
 		}
-		fp >> num >> size ;
+		fp >> num >> qmax ;
+		size = 2 * qmax + 2 ;
 		fp.close() ;
 		
 		intens_norm = INTENS_NORM ; 	// Chosen to make the image easily visible on a scale of 0-1
@@ -176,9 +177,6 @@ struct view_t {
 		}
 		
 		return 1 ;
-	}
-	
-	~view_t() {
 	}
 } ;
 
