@@ -1,8 +1,6 @@
-#ifndef MAX_HPP
-#define MAX_HPP
-
 #include <math.h>
-#include "structs.hh"
+#include "data.hh"
+#include "view.hh"
 
 #define P_MIN 0.001
 
@@ -96,5 +94,3 @@ void maximize(data_t *data, view_t *view) {
 	delete[] u ;
 	delete[] p ;
 }
-
-#endif // MAX_H

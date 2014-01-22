@@ -5,10 +5,15 @@
 #include <iomanip>
 #include <time.h>
 #include <math.h>
-#include "structs.hh"
+#include "data.hh"
+#include "det.hh"
+#include "model.hh"
+#include "view.hh"
 using namespace std ;
 
-void free_mem(data_t*, det_t*, model_t*, view_t*) ;
+void expand(det_t*, model_t*, view_t*) ;
+void maximize(data_t*, view_t*) ;
+void compress(det_t*, model_t*, view_t*) ;
 
 int main(int argc, char* argv[]) {
 	int iter, i ;
@@ -62,37 +67,5 @@ int main(int argc, char* argv[]) {
 		fp.close() ;
 	}
 	
-	free_mem(&Data, &Det, &Model, &View) ;
-	
 	return 0 ;
-}
-
-
-void free_mem(data_t *data, det_t *det, model_t *model, view_t *view) {
-	int i, d, r ;
-	
-	delete[] det->pix ;
-	
-	for (i = 0 ; i < model->size ; ++i) {
-		delete[] model->in[i] ;
-		delete[] model->out[i] ;
-		delete[] model->weight[i] ;
-	}
-	delete[] model->in ;
-	delete[] model->out ;
-	delete[] model->weight ;
-	
-	for (d = 0 ; d < data->num_data ; ++d) {
-		delete[] data->frame[d].place_ones ;
-		delete[] data->frame[d].place_multi ;
-		delete[] data->frame[d].count ;
-	}
-	delete[] data->frame ;
-	
-	for (r = 0 ; r < view->num_rot ; ++r) {
-		delete[] view->in[r] ;
-		delete[] view->out[r] ;
-	}
-	delete[] view->in ;
-	delete[] view->out ;
 }

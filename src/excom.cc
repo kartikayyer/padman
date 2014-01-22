@@ -1,11 +1,9 @@
-#ifndef EXCOM_HPP
-#define EXCOM_HPP
-
 #include <math.h>
-#include "structs.hh"
+#include "det.hh"
+#include "model.hh"
+#include "view.hh"
 
 #define PI 3.14159265
-
 
 void make_rot(double a, double r_matrix[][2]) {
 	r_matrix[0][0] = cos(a) ;
@@ -117,5 +115,3 @@ void compress(det_t *det, model_t *model, view_t *view) {
 		if (model->weight[x][y] != 0.)
 			model->out[x][y] *= model->intens_norm / model->weight[x][y] ;
 }
-
-#endif // EXCOM_HPP

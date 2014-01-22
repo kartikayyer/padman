@@ -58,6 +58,17 @@ struct data_t {
 		
 		return 1 ;
 	}
+    
+    ~data_t() {
+        int d ;
+        
+        for (d = 0 ; d < num_data ; ++d) {
+            delete[] frame[d].place_ones ;
+            delete[] frame[d].place_multi ;
+            delete[] frame[d].count ;
+        }
+        delete[] frame ;
+	}
 } ;
 
 struct det_t {
@@ -83,6 +94,14 @@ struct det_t {
 		fp.close() ;
 		
 		return 1 ;
+	}
+	
+	~det_t() {
+	    int i ;
+	    
+	    for (i = 0 ; i < num_pix ; ++i)
+	        delete[] pix[i] ;
+	    delete[] pix ;
 	}
 } ;
 
@@ -149,6 +168,20 @@ struct model_t {
 		
 		return 1 ;
 	}
+	
+    ~model_t() {
+        int i ;
+        
+        for (i = 0 ; i < size ; ++i) {
+            delete[] in[i] ;
+            delete[] out[i] ;
+            delete[] weight[i] ;
+        }
+        
+        delete[] in ;
+        delete[] out ;
+        delete[] weight ;
+    }
 } ;
 
 struct view_t {
@@ -177,6 +210,17 @@ struct view_t {
 		}
 		
 		return 1 ;
+	}
+	
+	~view_t() {
+        int r ;
+        
+        for (r = 0 ; r < num_rot ; ++r) {
+            delete[] in[r] ;
+            delete[] out[r] ;
+        }
+        delete[] in ;
+        delete[] out ;
 	}
 } ;
 
